@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <rect width="160" height="160" rx="32" fill="#E04E1F"/>
+  <text x="80" y="118" text-anchor="middle"
+        font-family="'Cormorant Garamond', 'Iowan Old Style', 'Apple Garamond', Garamond, Georgia, serif"
+        font-weight="500" font-size="115" fill="#FBF6EC"
+        letter-spacing="-4">DS</text>
+</svg>
