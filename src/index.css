@@ -92,11 +92,11 @@ body {
 /* — Sun / Moon mark (theme toggle) — */
 .mark {
   position: absolute;
-  top: clamp(28px, 6vw, 56px);
-  right: clamp(24px, 6vw, 48px);
-  width: 44px;
-  height: 44px;
-  padding: 0;
+  top: clamp(20px, 5vw, 44px);
+  right: clamp(16px, 5vw, 36px);
+  width: 56px;             /* larger hit target */
+  height: 56px;
+  padding: 8px;            /* visible icon stays ~40px, hit area is 56px */
   background: none;
   border: none;
   cursor: pointer;
@@ -105,6 +105,9 @@ body {
   animation: fadeIn 1400ms 200ms ease-out forwards;
   transition: color 220ms ease, transform 220ms ease;
   border-radius: 50%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  z-index: 2;              /* keep above meta on mobile column layout */
 }
 .mark svg {
   width: 100%;
@@ -120,6 +123,23 @@ body {
 }
 .mark:focus-visible {
   box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--accent);
+}
+
+/* In dark mode the moon doesn't spin — it breathes / glows softly */
+:root[data-theme='dark'] .mark svg {
+  animation: moonGlow 5.5s ease-in-out infinite;
+}
+@keyframes moonGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 0px transparent);
+    transform: scale(1);
+    opacity: 0.92;
+  }
+  50% {
+    filter: drop-shadow(0 0 8px var(--fx-glow));
+    transform: scale(1.05);
+    opacity: 1;
+  }
 }
 
 /* — Meta header — */
