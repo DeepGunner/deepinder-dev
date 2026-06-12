@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -794,4 +795,1519 @@
   }
   .login-title { margin: 0; font-size: 18px; }
   .login-sub { margin: 0; font-size: 13px; color: var(--text-faint); text-align: center; }
-  .error-text { color: var(--dang
+  .error-text { color: var(--danger); font-size: 12px; margin: 0; }
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-card {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: 14px; padding: 24px; width: 100%; max-width: 420px;
+  }
+  .modal-title { margin: 0 0 14px; font-size: 16px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+  .loading-screen {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px; color: var(--text-faint);
+  }
+  .hidden { display: none !important; }
+  .name-edit-row { display: flex; gap: 8px; flex: 1; }
+  .name-edit-row input { flex: 1; }
+  .player-edit-card { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+  .icon { display: inline-flex; align-items: center; justify-content: center; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+
+<div id="loading-screen" class="loading-screen">
+  <div class="icon">
+    <svg width="56" height="56" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="20" r="18" fill="#1a1306" stroke="var(--gold)" stroke-width="1.5"/>
+      <path d="M14 12h12v4a6 6 0 0 1-12 0v-4z" fill="var(--gold-light)"/>
+      <path d="M14 13h-3a3 3 0 0 0 3 3" fill="none" stroke="var(--gold-light)" stroke-width="1.2"/>
+      <path d="M26 13h3a3 3 0 0 1-3 3" fill="none" stroke="var(--gold-light)" stroke-width="1.2"/>
+      <rect x="18.5" y="22" width="3" height="3" fill="var(--gold-light)"/>
+      <path d="M15 28h10l-1.5-2h-7z" fill="var(--gold-light)"/>
+      <path d="M20 6.5l0.7 1.5 1.6 0.2-1.2 1.1 0.3 1.6-1.4-0.8-1.4 0.8 0.3-1.6-1.2-1.1 1.6-0.2z" fill="var(--gold-light)"/>
+    </svg>
+  </div>
+  <p>Loading tournaments...</p>
+</div>
+
+<div id="app" class="hidden">
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="badge-group">
+          <!-- FC 26 hexagon badge (original design) -->
+          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="#0d2b1a" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="20" y="18" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="11" fill="var(--accent)">FC</text>
+            <text x="20" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="11" fill="#ffffff">26</text>
+          </svg>
+          <!-- World Cup style trophy crest (original design) -->
+          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+            <circle cx="20" cy="20" r="18" fill="#1a1306" stroke="var(--gold)" stroke-width="1.5"/>
+            <path d="M14 12h12v4a6 6 0 0 1-12 0v-4z" fill="var(--gold-light)"/>
+            <path d="M14 13h-3a3 3 0 0 0 3 3" fill="none" stroke="var(--gold-light)" stroke-width="1.2"/>
+            <path d="M26 13h3a3 3 0 0 1-3 3" fill="none" stroke="var(--gold-light)" stroke-width="1.2"/>
+            <rect x="18.5" y="22" width="3" height="3" fill="var(--gold-light)"/>
+            <path d="M15 28h10l-1.5-2h-7z" fill="var(--gold-light)"/>
+            <path d="M20 6.5l0.7 1.5 1.6 0.2-1.2 1.1 0.3 1.6-1.4-0.8-1.4 0.8 0.3-1.6-1.2-1.1 1.6-0.2z" fill="var(--gold-light)"/>
+          </svg>
+        </div>
+        <div class="brand-text-wrap">
+          <span class="brand-title"><span class="accent-fc">FC 26</span> &middot; <span class="accent-wc">FIFA World Cup</span> Tracker</span>
+          <span class="brand-subtitle">FIFA Buoys Edition</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span id="save-status" class="save-status"></span>
+        <div class="view-toggle">
+          <button id="btn-public" class="toggle-btn active">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            Public
+          </button>
+          <button id="btn-admin" class="toggle-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            Admin
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Login view -->
+    <div id="view-login" class="login-wrap hidden">
+      <form id="login-form" class="login-card">
+        <span class="icon" style="color: var(--accent);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+        <h2 class="login-title">Admin access</h2>
+        <p class="login-sub">Enter the admin passcode to manage tournaments.</p>
+        <input id="passcode-input" type="password" placeholder="Passcode" autocomplete="off" />
+        <p id="passcode-error" class="error-text hidden">Incorrect passcode</p>
+        <button type="submit" class="btn-primary">
+          Unlock
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+        </button>
+        <button type="button" id="login-back-btn" class="btn-link">Back to public view</button>
+      </form>
+    </div>
+
+    <!-- Public / Admin view container -->
+    <div id="view-main" class="layout hidden">
+      <div id="sidebar" class="sidebar"></div>
+      <div id="content" class="content"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p style="margin:0;">FC 26 FIFA World Cup Tracker &mdash; group stage, knockouts, and a champion.</p>
+  </footer>
+</div>
+
+<!-- New tournament modal -->
+<div id="new-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3 class="modal-title">New tournament</h3>
+    <input id="new-tournament-name" placeholder="e.g. FC 26 World Cup - FIFA Buoys Edition" style="width:100%;" />
+    <div class="modal-actions">
+      <button id="new-modal-cancel" class="btn-secondary">Cancel</button>
+      <button id="new-modal-create" class="btn-primary">Create</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ---------------- Config ----------------
+  var ADMIN_PASSCODE = 'admin2026';
+
+  // ---------------- World Cup teams ----------------
+  // Name + ISO 3166-1 alpha-2 code (used to generate flag emoji)
+  var WORLD_CUP_TEAMS = [
+    { name: 'Argentina', code: 'AR' },
+    { name: 'Australia', code: 'AU' },
+    { name: 'Austria', code: 'AT' },
+    { name: 'Belgium', code: 'BE' },
+    { name: 'Brazil', code: 'BR' },
+    { name: 'Cameroon', code: 'CM' },
+    { name: 'Canada', code: 'CA' },
+    { name: 'Colombia', code: 'CO' },
+    { name: 'Costa Rica', code: 'CR' },
+    { name: 'Croatia', code: 'HR' },
+    { name: 'Curacao', code: 'CW' },
+    { name: 'Denmark', code: 'DK' },
+    { name: 'Ecuador', code: 'EC' },
+    { name: 'Egypt', code: 'EG' },
+    { name: 'England', code: 'GB-ENG' },
+    { name: 'France', code: 'FR' },
+    { name: 'Germany', code: 'DE' },
+    { name: 'Ghana', code: 'GH' },
+    { name: 'Haiti', code: 'HT' },
+    { name: 'Iran', code: 'IR' },
+    { name: 'Ivory Coast', code: 'CI' },
+    { name: 'Italy', code: 'IT' },
+    { name: 'Japan', code: 'JP' },
+    { name: 'Jordan', code: 'JO' },
+    { name: 'Mexico', code: 'MX' },
+    { name: 'Morocco', code: 'MA' },
+    { name: 'Netherlands', code: 'NL' },
+    { name: 'New Zealand', code: 'NZ' },
+    { name: 'Nigeria', code: 'NG' },
+    { name: 'Norway', code: 'NO' },
+    { name: 'Panama', code: 'PA' },
+    { name: 'Paraguay', code: 'PY' },
+    { name: 'Poland', code: 'PL' },
+    { name: 'Portugal', code: 'PT' },
+    { name: 'Qatar', code: 'QA' },
+    { name: 'Saudi Arabia', code: 'SA' },
+    { name: 'Scotland', code: 'GB-SCT' },
+    { name: 'Senegal', code: 'SN' },
+    { name: 'South Africa', code: 'ZA' },
+    { name: 'South Korea', code: 'KR' },
+    { name: 'Spain', code: 'ES' },
+    { name: 'Switzerland', code: 'CH' },
+    { name: 'Tunisia', code: 'TN' },
+    { name: 'Ukraine', code: 'UA' },
+    { name: 'United States', code: 'US' },
+    { name: 'Uruguay', code: 'UY' },
+    { name: 'Uzbekistan', code: 'UZ' },
+    { name: 'Wales', code: 'GB-WLS' }
+  ];
+
+  // Convert ISO 3166-1 alpha-2 code to a flag emoji using regional indicator symbols.
+  // Special-cases UK home nations, which don't have standard flag emoji codes.
+  var SPECIAL_FLAGS = {
+    'GB-ENG': '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F', // England
+    'GB-SCT': '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F', // Scotland
+    'GB-WLS': '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73\uDB40\uDC7F'  // Wales
+  };
+
+  function codeToFlagEmoji(code) {
+    if (SPECIAL_FLAGS[code]) return SPECIAL_FLAGS[code];
+    if (!code || code.length !== 2) return '';
+    var chars = code.toUpperCase().split('').map(function (c) {
+      return 0x1F1E6 + (c.charCodeAt(0) - 65);
+    });
+    return String.fromCodePoint.apply(String, chars);
+  }
+
+  // Map team name -> flag emoji, built once
+  var TEAM_FLAG_MAP = {};
+  WORLD_CUP_TEAMS.forEach(function (team) {
+    TEAM_FLAG_MAP[team.name] = codeToFlagEmoji(team.code);
+  });
+
+  function flagEmoji(teamName) {
+    return TEAM_FLAG_MAP[teamName] || '';
+  }
+
+  // ---------------- Icons ----------------
+  var ARROW_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>';
+  var ICONS = {
+    users: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    plus: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+    edit: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
+    trash: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>',
+    x: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>',
+    chevron: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
+    shuffle: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.7l-.359-.6"/></svg>',
+    award: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>',
+    trophy: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+    trophyBig: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+    crest: '<svg width="48" height="48" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#1a1306" stroke="var(--gold)" stroke-width="1.5"/><path d="M14 12h12v4a6 6 0 0 1-12 0v-4z" fill="var(--gold-light)"/><path d="M14 13h-3a3 3 0 0 0 3 3" fill="none" stroke="var(--gold-light)" stroke-width="1.2"/><path d="M26 13h3a3 3 0 0 1-3 3" fill="none" stroke="var(--gold-light)" stroke-width="1.2"/><rect x="18.5" y="22" width="3" height="3" fill="var(--gold-light)"/><path d="M15 28h10l-1.5-2h-7z" fill="var(--gold-light)"/><path d="M20 6.5l0.7 1.5 1.6 0.2-1.2 1.1 0.3 1.6-1.4-0.8-1.4 0.8 0.3-1.6-1.2-1.1 1.6-0.2z" fill="var(--gold-light)"/></svg>',
+    donkey: '\uD83E\uDDB4'
+  };
+
+  // ---------------- ID helper ----------------
+  var idCounter = 0;
+  function uid(prefix) {
+    idCounter += 1;
+    return (prefix || 'id') + '_' + Date.now() + '_' + idCounter + '_' + Math.floor(Math.random() * 10000);
+  }
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ---------------- Storage (Supabase) ----------------
+  var SUPABASE_URL = 'https://ngfohaxyhddpktyngldl.supabase.co/rest/v1';
+  var SUPABASE_KEY = 'sb_publishable_w6sEpEawBXK0V2xcdvlu0g_c7u_UvB5';
+  var SUPABASE_ROW_ID = 'main';
+
+  var SUPABASE_HEADERS = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json'
+  };
+
+  async function loadTournaments() {
+    try {
+      var res = await fetch(
+        SUPABASE_URL + '/tournaments_data?id=eq.' + SUPABASE_ROW_ID + '&select=data',
+        { headers: SUPABASE_HEADERS }
+      );
+      if (!res.ok) throw new Error('Failed to load: ' + res.status);
+      var rows = await res.json();
+      if (rows && rows.length > 0 && rows[0].data) {
+        return rows[0].data;
+      }
+      return [];
+    } catch (e) {
+      console.error('Load failed', e);
+      return [];
+    }
+  }
+
+  var saveTimeout = null;
+  function persist() {
+    setSaveStatus('saving');
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(async function () {
+      try {
+        var res = await fetch(
+          SUPABASE_URL + '/tournaments_data?on_conflict=id',
+          {
+            method: 'POST',
+            headers: Object.assign({}, SUPABASE_HEADERS, { 'Prefer': 'resolution=merge-duplicates' }),
+            body: JSON.stringify({ id: SUPABASE_ROW_ID, data: state.tournaments, updated_at: new Date().toISOString() })
+          }
+        );
+        if (!res.ok) throw new Error('Failed to save: ' + res.status);
+        setSaveStatus('saved');
+        setTimeout(function () { setSaveStatus(''); }, 1200);
+      } catch (e) {
+        setSaveStatus('');
+        console.error('Save failed', e);
+      }
+    }, 250);
+  }
+
+  function setSaveStatus(s) {
+    var el = document.getElementById('save-status');
+    if (s === 'saving') el.textContent = 'Saving...';
+    else if (s === 'saved') el.textContent = 'Saved';
+    else el.textContent = '';
+  }
+
+  // ---------------- Tournament logic ----------------
+  function newTournament(name) {
+    return {
+      id: uid('tourn'),
+      name: name || 'New Tournament',
+      createdAt: Date.now(),
+      status: 'setup', // setup | group | knockout | completed
+      players: [],
+      groups: [],
+      groupMatches: {},
+      knockoutRounds: [],
+      champion: null
+    };
+  }
+
+  function makeGroups(playerIds) {
+    var shuffled = playerIds.slice().sort(function () { return Math.random() - 0.5; });
+    var n = shuffled.length;
+    var groupCount = Math.round(n / 4);
+    if (groupCount < 1) groupCount = 1;
+    var groups = [];
+    for (var i = 0; i < groupCount; i++) groups.push([]);
+    shuffled.forEach(function (id, i) {
+      groups[i % groupCount].push(id);
+    });
+    return groups;
+  }
+
+  function roundRobinMatches(groupPlayerIds) {
+    var matches = [];
+    for (var i = 0; i < groupPlayerIds.length; i++) {
+      for (var j = i + 1; j < groupPlayerIds.length; j++) {
+        matches.push({
+          id: uid('match'),
+          playerA: groupPlayerIds[i],
+          playerB: groupPlayerIds[j],
+          scoreA: null,
+          scoreB: null,
+          completed: false
+        });
+      }
+    }
+    return matches;
+  }
+
+  function calcStandings(groupPlayerIds, matches) {
+    var stats = {};
+    groupPlayerIds.forEach(function (id) {
+      stats[id] = { id: id, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, points: 0 };
+    });
+    matches.forEach(function (m) {
+      if (!m.completed) return;
+      var a = stats[m.playerA];
+      var b = stats[m.playerB];
+      if (!a || !b) return;
+      a.played += 1;
+      b.played += 1;
+      a.gf += m.scoreA;
+      a.ga += m.scoreB;
+      b.gf += m.scoreB;
+      b.ga += m.scoreA;
+      if (m.scoreA > m.scoreB) {
+        a.won += 1; a.points += 3; b.lost += 1;
+      } else if (m.scoreA < m.scoreB) {
+        b.won += 1; b.points += 3; a.lost += 1;
+      } else {
+        a.drawn += 1; b.drawn += 1; a.points += 1; b.points += 1;
+      }
+    });
+    Object.keys(stats).forEach(function (k) { stats[k].gd = stats[k].gf - stats[k].ga; });
+    return Object.keys(stats).map(function (k) { return stats[k]; }).sort(function (x, y) {
+      if (y.points !== x.points) return y.points - x.points;
+      if (y.gd !== x.gd) return y.gd - x.gd;
+      if (y.gf !== x.gf) return y.gf - x.gf;
+      return 0;
+    });
+  }
+
+  // Aggregate every completed match (group + knockout) across the whole
+  // tournament per player, then find the player with the worst overall
+  // record - most losses, then worst goal difference, then fewest goals scored.
+  function getWorstPlayer(t) {
+    var stats = {};
+    t.players.forEach(function (p) {
+      stats[p.id] = { id: p.id, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0 };
+    });
+
+    var allMatches = [];
+    t.groups.forEach(function (g) {
+      (t.groupMatches[g.id] || []).forEach(function (m) { allMatches.push(m); });
+    });
+    (t.knockoutRounds || []).forEach(function (r) {
+      r.matches.forEach(function (m) { allMatches.push(m); });
+    });
+
+    allMatches.forEach(function (m) {
+      if (m.bye || !m.completed) return;
+      var a = stats[m.playerA];
+      var b = stats[m.playerB];
+      if (!a || !b) return;
+      a.played += 1;
+      b.played += 1;
+      a.gf += m.scoreA;
+      a.ga += m.scoreB;
+      b.gf += m.scoreB;
+      b.ga += m.scoreA;
+
+      // Determine winner, accounting for penalty shootouts on level scores
+      var winnerId = getMatchWinner(m);
+      if (winnerId === m.playerA) {
+        a.won += 1; b.lost += 1;
+      } else if (winnerId === m.playerB) {
+        b.won += 1; a.lost += 1;
+      } else {
+        a.drawn += 1; b.drawn += 1;
+      }
+    });
+
+    Object.keys(stats).forEach(function (k) { stats[k].gd = stats[k].gf - stats[k].ga; });
+
+    var withGames = Object.keys(stats).map(function (k) { return stats[k]; }).filter(function (s) { return s.played > 0; });
+    if (withGames.length === 0) return null;
+
+    withGames.sort(function (x, y) {
+      if (x.lost !== y.lost) return y.lost - x.lost; // most losses first
+      if (x.gd !== y.gd) return x.gd - y.gd; // worst goal difference first
+      if (x.gf !== y.gf) return x.gf - y.gf; // fewest goals scored first
+      return 0;
+    });
+
+    var worstStats = withGames[0];
+    var worstPlayer = t.players.filter(function (p) { return p.id === worstStats.id; })[0];
+    if (!worstPlayer) return null;
+    return { player: worstPlayer, stats: worstStats };
+  }
+
+  function advanceCount(groupSize) {
+    return Math.max(1, Math.round(groupSize / 2));
+  }
+
+  function makeKnockoutMatches(playerIds, roundLabel) {
+    var shuffled = playerIds.slice().sort(function () { return Math.random() - 0.5; });
+    var matches = [];
+    var i = 0;
+    while (i < shuffled.length) {
+      if (i + 1 < shuffled.length) {
+        matches.push({
+          id: uid('match'),
+          playerA: shuffled[i],
+          playerB: shuffled[i + 1],
+          scoreA: null,
+          scoreB: null,
+          completed: false,
+          bye: false
+        });
+        i += 2;
+      } else {
+        matches.push({
+          id: uid('match'),
+          playerA: shuffled[i],
+          playerB: null,
+          scoreA: null,
+          scoreB: null,
+          completed: true,
+          bye: true
+        });
+        i += 1;
+      }
+    }
+    return { round: roundLabel, matches: matches };
+  }
+
+  function knockoutRoundLabel(remainingCount) {
+    if (remainingCount <= 2) return 'Final';
+    if (remainingCount <= 4) return 'Semi-finals';
+    if (remainingCount <= 8) return 'Quarter-finals';
+    return 'Round of ' + remainingCount;
+  }
+
+  function getMatchWinner(match) {
+    if (match.bye) return match.playerA;
+    if (!match.completed) return null;
+    if (match.scoreA > match.scoreB) return match.playerA;
+    if (match.scoreB > match.scoreA) return match.playerB;
+    // Scores level - check penalties
+    if (match.penA !== null && match.penA !== undefined && match.penB !== null && match.penB !== undefined) {
+      if (match.penA > match.penB) return match.playerA;
+      if (match.penB > match.penA) return match.playerB;
+    }
+    return null;
+  }
+
+  function statusLabel(status) {
+    switch (status) {
+      case 'setup': return 'Setting up';
+      case 'group': return 'Group stage';
+      case 'knockout': return 'Knockout stage';
+      case 'completed': return 'Completed';
+      default: return status;
+    }
+  }
+
+  // ---------------- App state ----------------
+  var state = {
+    tournaments: [],
+    view: 'public', // public | admin | login
+    isAdminAuthed: false,
+    selectedTournamentId: null,
+    editingPlayerId: null
+  };
+
+  function findTournament(id) {
+    for (var i = 0; i < state.tournaments.length; i++) {
+      if (state.tournaments[i].id === id) return state.tournaments[i];
+    }
+    return null;
+  }
+
+  function updateTournament(id, updaterFn) {
+    var t = findTournament(id);
+    if (!t) return;
+    var idx = state.tournaments.indexOf(t);
+    state.tournaments[idx] = updaterFn(t);
+    persist();
+    render();
+  }
+
+  // ---------------- Render ----------------
+  function render() {
+    var scrollX = window.scrollX;
+    var scrollY = window.scrollY;
+
+    // Capture focus state so re-rendering innerHTML doesn't steal focus/scroll
+    var activeEl = document.activeElement;
+    var focusInfo = null;
+    if (activeEl && activeEl.tagName && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.tagName === 'TEXTAREA')) {
+      var attrNames = ['data-match-id', 'data-id', 'data-round-idx', 'data-group-id', 'id'];
+      var selector = activeEl.tagName.toLowerCase();
+      if (activeEl.className) {
+        activeEl.className.split(' ').forEach(function (c) {
+          if (c) selector += '.' + c;
+        });
+      }
+      attrNames.forEach(function (attr) {
+        var val = activeEl.getAttribute(attr);
+        if (val !== null) selector += '[' + attr + '="' + val + '"]';
+      });
+      focusInfo = {
+        selector: selector,
+        selectionStart: (typeof activeEl.selectionStart === 'number') ? activeEl.selectionStart : null,
+        selectionEnd: (typeof activeEl.selectionEnd === 'number') ? activeEl.selectionEnd : null
+      };
+    }
+
+    var loadingEl = document.getElementById('loading-screen');
+    var appEl = document.getElementById('app');
+    loadingEl.classList.add('hidden');
+    appEl.classList.remove('hidden');
+
+    document.getElementById('btn-public').classList.toggle('active', state.view === 'public');
+    document.getElementById('btn-admin').classList.toggle('active', state.view === 'admin' || state.view === 'login');
+
+    var loginView = document.getElementById('view-login');
+    var mainView = document.getElementById('view-main');
+
+    if (state.view === 'login') {
+      loginView.classList.remove('hidden');
+      mainView.classList.add('hidden');
+      return;
+    }
+    loginView.classList.add('hidden');
+    mainView.classList.remove('hidden');
+
+    var sidebar = document.getElementById('sidebar');
+    var content = document.getElementById('content');
+    var adminMode = state.view === 'admin' && state.isAdminAuthed;
+
+    // Sidebar
+    var sidebarHtml = '';
+    if (adminMode) {
+      sidebarHtml += '<button id="new-tournament-btn" class="new-tournament-btn">' + ICONS.plus + ' New tournament</button>';
+    }
+    if (state.tournaments.length === 0 && !adminMode) {
+      sidebarHtml = '';
+    } else {
+      sidebarHtml += '<div class="sidebar-list">';
+      state.tournaments.forEach(function (t) {
+        var active = t.id === state.selectedTournamentId ? ' active' : '';
+        sidebarHtml += '<div class="sidebar-item' + active + '" data-select-id="' + t.id + '">';
+        sidebarHtml += '<div style="flex:1; min-width:0;">';
+        sidebarHtml += '<p class="sidebar-item-name">' + escapeHtml(t.name) + '</p>';
+        sidebarHtml += '<p class="sidebar-item-meta">' + t.players.length + ' players &middot; ' + statusLabel(t.status) + '</p>';
+        sidebarHtml += '</div>';
+        if (adminMode) {
+          sidebarHtml += '<button class="icon-btn-danger" data-delete-id="' + t.id + '" title="Delete tournament">' + ICONS.trash + '</button>';
+        }
+        sidebarHtml += '</div>';
+      });
+      sidebarHtml += '</div>';
+    }
+    sidebar.innerHTML = sidebarHtml;
+
+    // Content
+    var selected = findTournament(state.selectedTournamentId);
+
+    if (state.tournaments.length === 0) {
+      content.innerHTML = emptyStateHtml(
+        adminMode
+          ? { title: 'No tournament selected', text: 'Create a new tournament to get started.' }
+          : { title: 'No tournaments yet', text: 'An admin needs to create a tournament first.' }
+      );
+    } else if (!selected) {
+      content.innerHTML = emptyStateHtml({ title: '', text: 'Select a tournament from the list.' });
+    } else {
+      content.innerHTML = tournamentViewHtml(selected, adminMode);
+    }
+
+    attachEventHandlers(adminMode, selected);
+
+    // Restore focus/selection and scroll position so editing doesn't jump the page
+    if (focusInfo) {
+      try {
+        var el = document.querySelector(focusInfo.selector);
+        if (el) {
+          el.focus();
+          if (focusInfo.selectionStart !== null && el.setSelectionRange) {
+            el.setSelectionRange(focusInfo.selectionStart, focusInfo.selectionEnd);
+          }
+        }
+      } catch (e) {
+        // selector may be invalid in edge cases - ignore
+      }
+    }
+    window.scrollTo(scrollX, scrollY);
+  }
+
+  function emptyStateHtml(opts) {
+    var html = '<div class="empty-state">';
+    html += '<span style="color:#374151;">' + ICONS.trophy + '</span>';
+    if (opts.title) html += '<h2 class="empty-title">' + escapeHtml(opts.title) + '</h2>';
+    html += '<p class="empty-text">' + escapeHtml(opts.text) + '</p>';
+    html += '</div>';
+    return html;
+  }
+
+  function championCelebrationHtml(champ) {
+    var html = '<div class="champion-celebration">';
+    html += '<div class="celebration-fireworks">';
+    // A handful of firework bursts at varied positions, sizes, colors, and animation delays
+    var fireworks = [
+      { x: '12%', y: '22%', color: 'var(--gold-light)', delay: '0s', size: 70 },
+      { x: '85%', y: '18%', color: 'var(--accent)', delay: '0.6s', size: 60 },
+      { x: '50%', y: '12%', color: '#ff6b6b', delay: '1.2s', size: 80 },
+      { x: '28%', y: '55%', color: 'var(--accent)', delay: '1.8s', size: 55 },
+      { x: '72%', y: '50%', color: 'var(--gold-light)', delay: '0.3s', size: 65 },
+      { x: '92%', y: '70%', color: '#ff6b6b', delay: '0.9s', size: 50 }
+    ];
+    fireworks.forEach(function (fw, i) {
+      html += '<div class="firework" style="left:' + fw.x + '; top:' + fw.y + '; animation-delay:' + fw.delay + ';">';
+      html += '<svg width="' + fw.size + '" height="' + fw.size + '" viewBox="0 0 100 100" aria-hidden="true">';
+      // Burst of lines radiating from center, plus dots at tips
+      for (var a = 0; a < 12; a++) {
+        var angle = (a / 12) * 2 * Math.PI;
+        var x1 = 50 + Math.cos(angle) * 12;
+        var y1 = 50 + Math.sin(angle) * 12;
+        var x2 = 50 + Math.cos(angle) * 42;
+        var y2 = 50 + Math.sin(angle) * 42;
+        html += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="' + fw.color + '" stroke-width="2.5" stroke-linecap="round"/>';
+        html += '<circle cx="' + x2.toFixed(1) + '" cy="' + y2.toFixed(1) + '" r="2.5" fill="' + fw.color + '"/>';
+      }
+      html += '<circle cx="50" cy="50" r="4" fill="' + fw.color + '"/>';
+      html += '</svg>';
+      html += '</div>';
+    });
+    html += '</div>'; // fireworks layer
+
+    html += '<div class="celebration-content">';
+    html += '<div class="celebration-trophy">';
+    html += '<svg width="76" height="100" viewBox="0 0 76 100" aria-hidden="true">';
+    // Base
+    html += '<rect x="22" y="88" width="32" height="8" rx="2" fill="var(--gold)"/>';
+    html += '<rect x="28" y="80" width="20" height="10" rx="2" fill="var(--gold-light)"/>';
+    // Stem
+    html += '<rect x="33" y="62" width="10" height="20" fill="var(--gold)"/>';
+    // Cup body (rounded, tapered)
+    html += '<path d="M16 8 H60 V20 C60 40 52 52 38 62 C24 52 16 40 16 20 Z" fill="var(--gold-light)" stroke="var(--gold)" stroke-width="1.5"/>';
+    // Banding around the cup, suggesting a globe-style pattern
+    html += '<path d="M16 22 H60" stroke="var(--gold)" stroke-width="1.5" opacity="0.6"/>';
+    html += '<path d="M18 34 H58" stroke="var(--gold)" stroke-width="1.5" opacity="0.5"/>';
+    html += '<path d="M22 46 H54" stroke="var(--gold)" stroke-width="1.5" opacity="0.4"/>';
+    html += '<path d="M38 8 V62" stroke="var(--gold)" stroke-width="1.2" opacity="0.4"/>';
+    // Handles
+    html += '<path d="M16 14 C4 14 4 34 16 34" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>';
+    html += '<path d="M60 14 C72 14 72 34 60 34" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>';
+    // Star on top
+    html += '<path d="M38 0 L40.5 5.5 L46 6.2 L42 10.2 L43 16 L38 13 L33 16 L34 10.2 L30 6.2 L35.5 5.5 Z" fill="var(--gold)"/>';
+    html += '</svg>';
+    html += '</div>';
+    html += '<p class="celebration-label">World Cup Champion</p>';
+    html += '<p class="celebration-name">' + escapeHtml(champ.name) + '</p>';
+    html += '<p class="celebration-team">' + flagEmoji(champ.team) + ' ' + escapeHtml(champ.team) + '</p>';
+    html += '</div>';
+
+    html += '</div>'; // champion-celebration
+    return html;
+  }
+
+  function tournamentViewHtml(t, adminMode) {
+    var html = '';
+
+    // Champion celebration banner (shown at top when tournament is complete)
+    if (t.status === 'completed' && t.champion) {
+      var topChamp = t.players.filter(function (p) { return p.id === t.champion; })[0];
+      if (topChamp) {
+        html += championCelebrationHtml(topChamp);
+      }
+    }
+
+    // Header
+    html += '<div class="tournament-header">';
+    html += '<div style="display:flex; align-items:center; gap:10px;" id="tournament-name-wrap">';
+    html += '<h1 class="tournament-title">' + escapeHtml(t.name) + '</h1>';
+    if (adminMode) {
+      html += '<button class="icon-btn" id="edit-name-btn">' + ICONS.edit + '</button>';
+    }
+    html += '</div>';
+    html += '<span class="status-badge">' + statusLabel(t.status) + '</span>';
+    html += '</div>';
+
+    // Player setup
+    if (t.status === 'setup') {
+      html += playerSetupHtml(t, adminMode);
+    }
+
+    // Wallchart (public view only) - groups + bracket combined
+    if (!adminMode && (t.status === 'group' || t.status === 'knockout' || t.status === 'completed')) {
+      html += wallchartHtml(t);
+    }
+
+    // Group stage
+    if (t.status === 'group' || t.status === 'knockout' || t.status === 'completed') {
+      html += groupStageHtml(t, adminMode);
+    }
+
+    // Knockout
+    if (t.status === 'knockout' || t.status === 'completed') {
+      html += knockoutHtml(t, adminMode);
+    }
+
+    // Champion
+    if (t.status === 'completed' && t.champion) {
+      var champ = t.players.filter(function (p) { return p.id === t.champion; })[0];
+      if (champ) {
+        html += '<div class="champion-banner">';
+        html += '<span style="color:var(--navy);">' + ICONS.crest + '</span>';
+        html += '<div>';
+        html += '<p class="champion-label">Champion</p>';
+        html += '<p class="champion-name">' + escapeHtml(champ.name) + '</p>';
+        html += '<p class="champion-team">' + flagEmoji(champ.team) + ' ' + escapeHtml(champ.team) + '</p>';
+        html += '</div>';
+        html += '</div>';
+      }
+    }
+
+    // Wooden spoon - worst player of the tournament
+    if (t.status === 'completed') {
+      var worst = getWorstPlayer(t);
+      if (worst) {
+        html += '<div class="wooden-spoon-banner">';
+        html += '<span class="wooden-spoon-emoji">' + ICONS.donkey + '</span>';
+        html += '<div>';
+        html += '<p class="wooden-spoon-label">Sab to wadda laantiya</p>';
+        html += '<p class="wooden-spoon-name">' + escapeHtml(worst.player.name) + '</p>';
+        html += '<p class="wooden-spoon-team">' + flagEmoji(worst.player.team) + ' ' + escapeHtml(worst.player.team) + '</p>';
+        html += '<p class="wooden-spoon-stats">' + worst.stats.played + ' played, ' + worst.stats.lost + ' lost, goal difference ' + (worst.stats.gd > 0 ? '+' : '') + worst.stats.gd + '</p>';
+        html += '<p class="wooden-spoon-quip"><strong>Lakh di laanat hai, ' + escapeHtml(worst.player.name) + '!</strong></p>';
+        html += '</div>';
+        html += '</div>';
+      }
+    }
+
+    return html;
+  }
+
+  function teamSelectHtml(extraAttrs, selectedValue) {
+    var html = '<select ' + (extraAttrs || '') + '>';
+    html += '<option value="">Select a team...</option>';
+    WORLD_CUP_TEAMS.forEach(function (team) {
+      var sel = team.name === selectedValue ? ' selected' : '';
+      html += '<option value="' + escapeHtml(team.name) + '"' + sel + '>' + flagEmoji(team.name) + ' ' + escapeHtml(team.name) + '</option>';
+    });
+    html += '</select>';
+    return html;
+  }
+
+  function playerSetupHtml(t, adminMode) {
+    var html = '<div class="section">';
+    html += '<h2 class="section-title">' + ICONS.users + ' Players &amp; teams (' + t.players.length + ')</h2>';
+
+    if (adminMode) {
+      html += '<div class="add-player-row">';
+      html += '<input id="new-player-name" placeholder="Player name" style="flex:1; min-width:140px;" />';
+      html += teamSelectHtml('id="new-player-team" style="flex:1; min-width:140px;"', '');
+      html += '<button id="add-player-btn" class="btn-primary">' + ICONS.plus + ' Add</button>';
+      html += '</div>';
+    }
+
+    if (t.players.length === 0) {
+      html += '<p class="empty-text">No players added yet.</p>';
+    } else {
+      html += '<div class="player-grid">';
+      t.players.forEach(function (p) {
+        html += '<div class="player-card">';
+        if (adminMode && state.editingPlayerId === p.id) {
+          html += '<div class="player-edit-card">';
+          html += '<input class="edit-player-name" data-id="' + p.id + '" value="' + escapeHtml(p.name) + '" style="width:100%;" />';
+          html += teamSelectHtml('class="edit-player-team" data-id="' + p.id + '" style="width:100%;"', p.team);
+          html += '<div style="display:flex; gap:6px;">';
+          html += '<button class="icon-btn save-player-btn" data-id="' + p.id + '">' + ICONS.check + '</button>';
+          html += '<button class="icon-btn cancel-edit-player-btn">' + ICONS.x + '</button>';
+          html += '</div>';
+          html += '</div>';
+        } else {
+          html += '<div style="flex:1; min-width:0;">';
+          html += '<p class="player-name">' + escapeHtml(p.name) + '</p>';
+          html += '<p class="player-team">' + flagEmoji(p.team) + ' ' + escapeHtml(p.team) + '</p>';
+          html += '</div>';
+          if (adminMode) {
+            html += '<div style="display:flex; gap:4px;">';
+            html += '<button class="icon-btn edit-player-btn" data-id="' + p.id + '">' + ICONS.edit + '</button>';
+            html += '<button class="icon-btn-danger remove-player-btn" data-id="' + p.id + '">' + ICONS.trash + '</button>';
+            html += '</div>';
+          }
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    if (adminMode && t.players.length >= 2) {
+      html += '<button id="start-tournament-btn" class="btn-primary" style="margin-top:16px;">' + ICONS.shuffle + ' Generate groups &amp; start tournament</button>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function wallchartHtml(t) {
+    var html = '<div class="section">';
+    html += '<div class="wallchart">';
+
+    // Header with badges
+    html += '<div class="wallchart-header">';
+    html += '<svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true">';
+    html += '<polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="#0d2b1a" stroke="var(--accent)" stroke-width="1.5"/>';
+    html += '<text x="20" y="18" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="11" fill="var(--accent)">FC</text>';
+    html += '<text x="20" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="11" fill="#ffffff">26</text>';
+    html += '</svg>';
+    html += '<span class="wallchart-title">' + escapeHtml(t.name) + ' <span class="accent-wc">&middot; World Cup</span></span>';
+    html += '<svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true">';
+    html += '<circle cx="20" cy="20" r="18" fill="#1a1306" stroke="var(--gold)" stroke-width="1.5"/>';
+    html += '<path d="M14 12h12v4a6 6 0 0 1-12 0v-4z" fill="var(--gold-light)"/>';
+    html += '<path d="M14 13h-3a3 3 0 0 0 3 3" fill="none" stroke="var(--gold-light)" stroke-width="1.2"/>';
+    html += '<path d="M26 13h3a3 3 0 0 1-3 3" fill="none" stroke="var(--gold-light)" stroke-width="1.2"/>';
+    html += '<rect x="18.5" y="22" width="3" height="3" fill="var(--gold-light)"/>';
+    html += '<path d="M15 28h10l-1.5-2h-7z" fill="var(--gold-light)"/>';
+    html += '<path d="M20 6.5l0.7 1.5 1.6 0.2-1.2 1.1 0.3 1.6-1.4-0.8-1.4 0.8 0.3-1.6-1.2-1.1 1.6-0.2z" fill="var(--gold-light)"/>';
+    html += '</svg>';
+    html += '</div>';
+
+    // Build group standings, splitting into left/right columns
+    var groupCards = t.groups.map(function (g, idx) {
+      var matches = t.groupMatches[g.id] || [];
+      var standings = calcStandings(g.playerIds, matches);
+      var advCount = advanceCount(g.playerIds.length);
+      var card = '<div class="wallchart-group-block">';
+      card += '<div class="wallchart-group-card">';
+      card += '<p class="wallchart-group-title">Group ' + String.fromCharCode(65 + idx) + '</p>';
+      standings.forEach(function (s, i) {
+        var p = t.players.filter(function (pl) { return pl.id === s.id; })[0];
+        var rowClass = i < advCount ? ' advancing' : '';
+        card += '<div class="wallchart-group-row' + rowClass + '">';
+        card += '<span class="wr-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">' + escapeHtml(p ? p.name : '') + '</span>';
+        card += '<span class="wgr-team">' + flagEmoji(p ? p.team : '') + ' ' + escapeHtml(p ? p.team : '') + '</span>';
+        card += '</div>';
+      });
+      card += '</div>'; // wallchart-group-card
+      card += '</div>'; // wallchart-group-block
+      return card;
+    });
+
+    var leftGroups = [];
+    var rightGroups = [];
+    groupCards.forEach(function (card, i) {
+      if (i % 2 === 0) leftGroups.push(card);
+      else rightGroups.push(card);
+    });
+
+    html += '<div class="wallchart-body">';
+
+    // Left column
+    html += '<div class="wallchart-groups-col">' + leftGroups.join('') + '</div>';
+
+    // Center bracket column
+    html += '<div class="wallchart-bracket-col">';
+    if (t.knockoutRounds && t.knockoutRounds.length > 0) {
+      html += '<div class="wallchart-rounds">';
+      t.knockoutRounds.forEach(function (round, rIdx) {
+        if (rIdx > 0) {
+          html += '<div class="wallchart-round-arrow">' + ARROW_ICON + '</div>';
+        }
+        html += '<div class="wallchart-round-col">';
+        round.matches.forEach(function (m) {
+          var playerA = t.players.filter(function (p) { return p.id === m.playerA; })[0];
+          var playerB = m.playerB ? t.players.filter(function (p) { return p.id === m.playerB; })[0] : null;
+          var winnerId = getMatchWinner(m);
+
+          html += '<div class="wallchart-match-box">';
+          if (m.bye) {
+            html += '<div class="wallchart-row winner"><span class="wr-name">' + escapeHtml(playerA ? playerA.name : '') + '</span><span class="wr-score">BYE</span></div>';
+          } else {
+            var aClass = (winnerId && winnerId === m.playerA) ? ' winner' : '';
+            var bClass = (winnerId && winnerId === m.playerB) ? ' winner' : '';
+            var aScore = m.completed ? m.scoreA : '';
+            var bScore = m.completed ? m.scoreB : '';
+            html += '<div class="wallchart-row' + aClass + '"><span class="wr-name">' + escapeHtml(playerA ? playerA.name : '') + '</span><span class="wr-score">' + aScore + '</span></div>';
+            html += '<div class="wallchart-row' + bClass + '"><span class="wr-name">' + escapeHtml(playerB ? playerB.name : 'TBD') + '</span><span class="wr-score">' + bScore + '</span></div>';
+            if (m.completed && m.scoreA === m.scoreB && m.penA !== null && m.penA !== undefined && m.penB !== null && m.penB !== undefined) {
+              html += '<div style="text-align:center; font-size:10px; color:var(--gold-light); padding:2px 8px 4px; border-top:1px dashed rgba(255,255,255,0.15);">pens ' + m.penA + '-' + m.penB + '</div>';
+            }
+          }
+          html += '</div>';
+        });
+        html += '</div>'; // round-col
+      });
+      html += '</div>'; // rounds
+    } else {
+      html += '<p class="empty-text" style="color:#d1fae5;">Bracket will appear once the group stage is complete.</p>';
+    }
+
+    if (t.status === 'completed' && t.champion) {
+      var champ = t.players.filter(function (p) { return p.id === t.champion; })[0];
+      if (champ) {
+        html += '<div class="wallchart-champion-row">';
+        html += '<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">';
+        html += '<circle cx="20" cy="20" r="18" fill="#1a1306" stroke="var(--gold)" stroke-width="1.5"/>';
+        html += '<path d="M14 12h12v4a6 6 0 0 1-12 0v-4z" fill="var(--gold-light)"/>';
+        html += '<path d="M14 13h-3a3 3 0 0 0 3 3" fill="none" stroke="var(--gold-light)" stroke-width="1.2"/>';
+        html += '<path d="M26 13h3a3 3 0 0 1-3 3" fill="none" stroke="var(--gold-light)" stroke-width="1.2"/>';
+        html += '<rect x="18.5" y="22" width="3" height="3" fill="var(--gold-light)"/>';
+        html += '<path d="M15 28h10l-1.5-2h-7z" fill="var(--gold-light)"/>';
+        html += '<path d="M20 6.5l0.7 1.5 1.6 0.2-1.2 1.1 0.3 1.6-1.4-0.8-1.4 0.8 0.3-1.6-1.2-1.1 1.6-0.2z" fill="var(--gold-light)"/>';
+        html += '</svg>';
+        html += '<div>';
+        html += '<p class="wallchart-champion-label">World Cup champion</p>';
+        html += '<p class="wallchart-champion-name">' + escapeHtml(champ.name) + '</p>';
+        html += '<p class="wallchart-champion-team">' + flagEmoji(champ.team) + ' ' + escapeHtml(champ.team) + '</p>';
+        html += '</div>';
+        html += '</div>';
+      }
+    } else if (t.status === 'knockout') {
+      html += '<div class="wallchart-final-box" style="margin-top:14px;">Final TBD</div>';
+    }
+
+    html += '</div>'; // bracket-col
+
+    // Right column
+    html += '<div class="wallchart-groups-col">' + rightGroups.join('') + '</div>';
+
+    html += '</div>'; // wallchart-body
+    html += '</div>'; // wallchart
+    html += '</div>'; // section
+    return html;
+  }
+
+  function groupStageHtml(t, adminMode) {
+    var html = '<div class="section">';
+    html += '<h2 class="section-title">Group stage</h2>';
+    html += '<div class="groups-grid">';
+
+    var allComplete = true;
+
+    t.groups.forEach(function (g, idx) {
+      var matches = t.groupMatches[g.id] || [];
+      var standings = calcStandings(g.playerIds, matches);
+      var advCount = advanceCount(g.playerIds.length);
+
+      matches.forEach(function (m) { if (!m.completed) allComplete = false; });
+
+      html += '<div class="group-card">';
+      html += '<h3 class="group-title">Group ' + String.fromCharCode(65 + idx) + '</h3>';
+      html += '<table class="standings"><thead><tr>';
+      html += '<th>Player</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th>';
+      html += '</tr></thead><tbody>';
+
+      standings.forEach(function (s, i) {
+        var p = t.players.filter(function (pl) { return pl.id === s.id; })[0];
+        var rowClass = i < advCount ? ' class="advancing"' : '';
+        var gdStr = s.gd > 0 ? ('+' + s.gd) : s.gd;
+        html += '<tr' + rowClass + '>';
+        html += '<td><div><div class="standings-name">' + escapeHtml(p ? p.name : '') + '</div><div class="standings-team">' + flagEmoji(p ? p.team : '') + ' ' + escapeHtml(p ? p.team : '') + '</div></div></td>';
+        html += '<td>' + s.played + '</td><td>' + s.won + '</td><td>' + s.drawn + '</td><td>' + s.lost + '</td><td>' + gdStr + '</td><td style="font-weight:600;">' + s.points + '</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+
+      html += '<div class="match-list">';
+      matches.forEach(function (m) {
+        html += matchRowHtml(t, m, g.id, -1, adminMode, true);
+      });
+      html += '</div>';
+
+      html += '</div>'; // group-card
+    });
+
+    html += '</div>'; // groups-grid
+
+    if (adminMode && t.status === 'group') {
+      html += '<button id="advance-knockout-btn" class="btn-primary" style="margin-top:16px;"' + (allComplete ? '' : ' disabled') + '>' + ICONS.chevron + ' Finish group stage &amp; generate knockout bracket</button>';
+      if (!allComplete) {
+        html += '<p class="hint-text">Enter all group match scores to continue.</p>';
+      }
+    }
+
+    html += '</div>'; // section
+    return html;
+  }
+
+  function knockoutHtml(t, adminMode) {
+    var html = '<div class="section">';
+    html += '<h2 class="section-title">' + ICONS.award + ' Knockout stage</h2>';
+    html += '<div class="bracket-wrap">';
+
+    t.knockoutRounds.forEach(function (round, roundIdx) {
+      html += '<div class="bracket-round">';
+      html += '<h3 class="round-title">' + escapeHtml(round.round) + '</h3>';
+      html += '<div class="match-list">';
+      round.matches.forEach(function (m) {
+        html += matchRowHtml(t, m, null, roundIdx, adminMode, false);
+      });
+      html += '</div>';
+
+      var roundComplete = round.matches.every(function (m) { return m.bye || getMatchWinner(m) !== null; });
+      var isLastRound = roundIdx === t.knockoutRounds.length - 1;
+
+      if (adminMode && isLastRound && t.status !== 'completed') {
+        if (roundComplete) {
+          var winners = round.matches.map(getMatchWinner).filter(Boolean);
+          var label = winners.length === 1 ? 'Crown champion' : 'Generate next round';
+          html += '<button class="btn-primary generate-next-round-btn" data-round-idx="' + roundIdx + '" style="margin-top:12px; width:100%;">' + ICONS.chevron + ' ' + label + '</button>';
+        } else {
+          html += '<p class="hint-text">Enter all results to continue.</p>';
+        }
+      }
+
+      html += '</div>'; // bracket-round
+    });
+
+    html += '</div>'; // bracket-wrap
+    html += '</div>'; // section
+    return html;
+  }
+
+  function matchRowHtml(t, m, groupId, roundIdx, adminMode, allowDraw) {
+    var playerA = t.players.filter(function (p) { return p.id === m.playerA; })[0];
+    var playerB = m.playerB ? t.players.filter(function (p) { return p.id === m.playerB; })[0] : null;
+
+    if (m.bye) {
+      var html = '<div class="match-row">';
+      html += '<div class="match-player"><span class="match-player-name">' + escapeHtml(playerA ? playerA.name : '') + '</span><span class="match-player-team">' + flagEmoji(playerA ? playerA.team : '') + ' ' + escapeHtml(playerA ? playerA.team : '') + '</span></div>';
+      html += '<span class="bye-badge">Bye - advances</span>';
+      html += '<div class="match-player"><span class="match-player-name">&mdash;</span></div>';
+      html += '</div>';
+      return html;
+    }
+
+    var a = m.scoreA === null || m.scoreA === undefined ? '' : m.scoreA;
+    var b = m.scoreB === null || m.scoreB === undefined ? '' : m.scoreB;
+
+    var winnerA = m.completed && a !== '' && b !== '' && Number(a) > Number(b);
+    var winnerB = m.completed && a !== '' && b !== '' && Number(b) > Number(a);
+    var isDrawCompleted = m.completed && a !== '' && b !== '' && Number(a) === Number(b);
+
+    // For knockout matches level after 90 minutes, penalty winner takes the highlight
+    if (!allowDraw && isDrawCompleted) {
+      var matchWinnerId = getMatchWinner(m);
+      if (matchWinnerId === m.playerA) winnerA = true;
+      if (matchWinnerId === m.playerB) winnerB = true;
+    }
+
+    var dataAttrs = 'data-match-id="' + m.id + '"';
+    if (groupId !== null) dataAttrs += ' data-group-id="' + groupId + '"';
+    if (roundIdx !== -1) dataAttrs += ' data-round-idx="' + roundIdx + '"';
+    dataAttrs += ' data-allow-draw="' + (allowDraw ? '1' : '0') + '"';
+
+    var html = '<div class="match-row">';
+    html += '<div class="match-player' + (winnerA ? ' winner' : '') + '"><span class="match-player-name">' + escapeHtml(playerA ? playerA.name : '') + '</span><span class="match-player-team">' + flagEmoji(playerA ? playerA.team : '') + ' ' + escapeHtml(playerA ? playerA.team : '') + '</span></div>';
+
+    if (adminMode) {
+      html += '<div class="score-inputs">';
+      html += '<input type="number" min="0" class="score-input score-input-a" ' + dataAttrs + ' value="' + a + '" />';
+      html += '<span class="score-dash">-</span>';
+      html += '<input type="number" min="0" class="score-input score-input-b" ' + dataAttrs + ' value="' + b + '" />';
+      html += '</div>';
+    } else {
+      var displayScore = m.completed ? (a + ' - ' + b) : 'vs';
+      html += '<div class="score-display">' + displayScore + '</div>';
+    }
+
+    html += '<div class="match-player right' + (winnerB ? ' winner' : '') + '"><span class="match-player-name">' + escapeHtml(playerB ? playerB.name : '') + '</span><span class="match-player-team">' + flagEmoji(playerB ? playerB.team : '') + ' ' + escapeHtml(playerB ? playerB.team : '') + '</span></div>';
+
+    // Penalty shootout for knockout matches level after 90 minutes
+    if (!allowDraw && isDrawCompleted) {
+      var penA = m.penA === null || m.penA === undefined ? '' : m.penA;
+      var penB = m.penB === null || m.penB === undefined ? '' : m.penB;
+      var penDataAttrs = 'data-match-id="' + m.id + '"';
+      if (roundIdx !== -1) penDataAttrs += ' data-round-idx="' + roundIdx + '"';
+
+      html += '<div class="penalty-section">';
+      html += '<span class="penalty-label">Penalties</span>';
+      if (adminMode) {
+        html += '<input type="number" min="0" class="penalty-input penalty-input-a" ' + penDataAttrs + ' value="' + penA + '" />';
+        html += '<span class="score-dash">-</span>';
+        html += '<input type="number" min="0" class="penalty-input penalty-input-b" ' + penDataAttrs + ' value="' + penB + '" />';
+      } else {
+        var penDisplay = (penA !== '' && penB !== '') ? (penA + ' - ' + penB) : 'TBD';
+        html += '<span class="penalty-display">' + penDisplay + '</span>';
+      }
+      html += '</div>';
+
+      if (adminMode && (penA === '' || penB === '' || Number(penA) === Number(penB))) {
+        html += '<p class="hint-text" style="width:100%; text-align:center;">Enter penalty shootout scores (no draws) to determine the winner.</p>';
+      }
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  // ---------------- Event handlers ----------------
+  function attachEventHandlers(adminMode, selected) {
+    // Sidebar selection
+    document.querySelectorAll('[data-select-id]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        state.selectedTournamentId = el.getAttribute('data-select-id');
+        state.editingPlayerId = null;
+        render();
+      });
+    });
+
+    // Sidebar delete
+    document.querySelectorAll('[data-delete-id]').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var id = el.getAttribute('data-delete-id');
+        if (!confirm('Delete this tournament permanently?')) return;
+        state.tournaments = state.tournaments.filter(function (t) { return t.id !== id; });
+        if (state.selectedTournamentId === id) {
+          state.selectedTournamentId = state.tournaments.length > 0 ? state.tournaments[0].id : null;
+        }
+        persist();
+        render();
+      });
+    });
+
+    // New tournament button
+    var newBtn = document.getElementById('new-tournament-btn');
+    if (newBtn) {
+      newBtn.addEventListener('click', function () {
+        document.getElementById('new-tournament-name').value = '';
+        document.getElementById('new-modal').classList.remove('hidden');
+        document.getElementById('new-tournament-name').focus();
+      });
+    }
+
+    if (!selected) return;
+
+    // Edit tournament name
+    var editNameBtn = document.getElementById('edit-name-btn');
+    if (editNameBtn) {
+      editNameBtn.addEventListener('click', function () {
+        var wrap = document.getElementById('tournament-name-wrap');
+        wrap.innerHTML = '<div class="name-edit-row"><input id="edit-name-input" value="' + escapeHtml(selected.name) + '" /><button id="save-name-btn" class="icon-btn">' + ICONS.check + '</button><button id="cancel-name-btn" class="icon-btn">' + ICONS.x + '</button></div>';
+        var input = document.getElementById('edit-name-input');
+        input.focus();
+        input.select();
+        document.getElementById('save-name-btn').addEventListener('click', saveNameEdit);
+        document.getElementById('cancel-name-btn').addEventListener('click', render);
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') saveNameEdit();
+        });
+      });
+    }
+
+    function saveNameEdit() {
+      var val = document.getElementById('edit-name-input').value.trim();
+      updateTournament(selected.id, function (t) {
+        return Object.assign({}, t, { name: val || t.name });
+      });
+    }
+
+    // Add player
+    var addPlayerBtn = document.getElementById('add-player-btn');
+    if (addPlayerBtn) {
+      addPlayerBtn.addEventListener('click', addPlayer);
+      ['new-player-name', 'new-player-team'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') addPlayer();
+        });
+      });
+    }
+
+    function addPlayer() {
+      var nameInput = document.getElementById('new-player-name');
+      var teamInput = document.getElementById('new-player-team');
+      var name = nameInput.value.trim();
+      var team = teamInput.value.trim();
+      if (!name || !team) return;
+      updateTournament(selected.id, function (t) {
+        var players = t.players.concat([{ id: uid('player'), name: name, team: team }]);
+        return Object.assign({}, t, { players: players });
+      });
+    }
+
+    // Edit player (start)
+    document.querySelectorAll('.edit-player-btn').forEach(function (el) {
+      el.addEventListener('click', function () {
+        state.editingPlayerId = el.getAttribute('data-id');
+        render();
+      });
+    });
+
+    // Cancel edit player
+    document.querySelectorAll('.cancel-edit-player-btn').forEach(function (el) {
+      el.addEventListener('click', function () {
+        state.editingPlayerId = null;
+        render();
+      });
+    });
+
+    // Save player edit
+    document.querySelectorAll('.save-player-btn').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var id = el.getAttribute('data-id');
+        var nameInput = document.querySelector('.edit-player-name[data-id="' + id + '"]');
+        var teamInput = document.querySelector('.edit-player-team[data-id="' + id + '"]');
+        var newName = nameInput.value.trim();
+        var newTeam = teamInput.value.trim();
+        updateTournament(selected.id, function (t) {
+          var players = t.players.map(function (p) {
+            if (p.id !== id) return p;
+            return Object.assign({}, p, {
+              name: newName || p.name,
+              team: newTeam || p.team
+            });
+          });
+          return Object.assign({}, t, { players: players });
+        });
+        state.editingPlayerId = null;
+      });
+    });
+
+    // Remove player
+    document.querySelectorAll('.remove-player-btn').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var id = el.getAttribute('data-id');
+        updateTournament(selected.id, function (t) {
+          return Object.assign({}, t, { players: t.players.filter(function (p) { return p.id !== id; }) });
+        });
+      });
+    });
+
+    // Start tournament (generate groups)
+    var startBtn = document.getElementById('start-tournament-btn');
+    if (startBtn) {
+      startBtn.addEventListener('click', function () {
+        if (selected.players.length < 2) {
+          alert('Add at least 2 players to start the tournament.');
+          return;
+        }
+        updateTournament(selected.id, function (t) {
+          var playerIds = t.players.map(function (p) { return p.id; });
+          var groupsRaw = makeGroups(playerIds);
+          var groups = groupsRaw.map(function (ids) { return { id: uid('group'), playerIds: ids }; });
+          var groupMatches = {};
+          groups.forEach(function (g) {
+            groupMatches[g.id] = roundRobinMatches(g.playerIds);
+          });
+          return Object.assign({}, t, { status: 'group', groups: groups, groupMatches: groupMatches });
+        });
+      });
+    }
+
+    // Group match score inputs
+    document.querySelectorAll('.match-row .score-input').forEach(function (el) {
+      el.addEventListener('input', function () {
+        handleScoreChange(el);
+      });
+    });
+
+    // Penalty shootout inputs
+    document.querySelectorAll('.match-row .penalty-input').forEach(function (el) {
+      el.addEventListener('input', function () {
+        handlePenaltyChange(el);
+      });
+    });
+
+    function handlePenaltyChange(el) {
+      var matchId = el.getAttribute('data-match-id');
+      var roundIdxAttr = el.getAttribute('data-round-idx');
+      var roundIdx = Number(roundIdxAttr);
+
+      var row = el.closest('.match-row');
+      var aInput = row.querySelector('.penalty-input-a');
+      var bInput = row.querySelector('.penalty-input-b');
+      var aVal = aInput.value;
+      var bVal = bInput.value;
+      var penA = aVal === '' ? null : Number(aVal);
+      var penB = bVal === '' ? null : Number(bVal);
+
+      updateTournament(selected.id, function (t) {
+        var rounds = t.knockoutRounds.map(function (r, i) {
+          if (i !== roundIdx) return r;
+          var matches = r.matches.map(function (m) {
+            if (m.id !== matchId) return m;
+            return Object.assign({}, m, { penA: penA, penB: penB });
+          });
+          return Object.assign({}, r, { matches: matches });
+        });
+        return Object.assign({}, t, { knockoutRounds: rounds });
+      });
+    }
+
+    function handleScoreChange(el) {
+      var matchId = el.getAttribute('data-match-id');
+      var groupId = el.getAttribute('data-group-id');
+      var roundIdxAttr = el.getAttribute('data-round-idx');
+      var allowDraw = el.getAttribute('data-allow-draw') === '1';
+
+      var row = el.closest('.match-row');
+      var aInput = row.querySelector('.score-input-a');
+      var bInput = row.querySelector('.score-input-b');
+      var aVal = aInput.value;
+      var bVal = bInput.value;
+      var numA = aVal === '' ? null : Number(aVal);
+      var numB = bVal === '' ? null : Number(bVal);
+
+      if (groupId) {
+        // Group stage match
+        updateTournament(selected.id, function (t) {
+          var matches = t.groupMatches[groupId].map(function (m) {
+            if (m.id !== matchId) return m;
+            var completed = numA !== null && numB !== null;
+            return Object.assign({}, m, { scoreA: numA, scoreB: numB, completed: completed });
+          });
+          var groupMatches = Object.assign({}, t.groupMatches);
+          groupMatches[groupId] = matches;
+          return Object.assign({}, t, { groupMatches: groupMatches });
+        });
+      } else {
+        // Knockout match
+        var roundIdx = Number(roundIdxAttr);
+        updateTournament(selected.id, function (t) {
+          var completed = numA !== null && numB !== null;
+          var rounds = t.knockoutRounds.map(function (r, i) {
+            if (i !== roundIdx) return r;
+            var matches = r.matches.map(function (m) {
+              if (m.id !== matchId) return m;
+              var updated = Object.assign({}, m, { scoreA: numA, scoreB: numB, completed: completed });
+              // Clear penalties if scores are no longer level
+              if (numA !== numB) {
+                updated.penA = null;
+                updated.penB = null;
+              }
+              return updated;
+            });
+            return Object.assign({}, r, { matches: matches });
+          });
+          return Object.assign({}, t, { knockoutRounds: rounds });
+        });
+      }
+    }
+
+    // Advance to knockout
+    var advanceBtn = document.getElementById('advance-knockout-btn');
+    if (advanceBtn) {
+      advanceBtn.addEventListener('click', function () {
+        updateTournament(selected.id, function (t) {
+          var advancingIds = [];
+          t.groups.forEach(function (g) {
+            var standings = calcStandings(g.playerIds, t.groupMatches[g.id]);
+            var count = advanceCount(g.playerIds.length);
+            standings.slice(0, count).forEach(function (s) { advancingIds.push(s.id); });
+          });
+          var round = makeKnockoutMatches(advancingIds, knockoutRoundLabel(advancingIds.length));
+          return Object.assign({}, t, { status: 'knockout', knockoutRounds: [round] });
+        });
+      });
+    }
+
+    // Generate next round / crown champion
+    document.querySelectorAll('.generate-next-round-btn').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var roundIdx = Number(el.getAttribute('data-round-idx'));
+        updateTournament(selected.id, function (t) {
+          var round = t.knockoutRounds[roundIdx];
+          var winners = round.matches.map(getMatchWinner).filter(Boolean);
+
+          if (winners.length === 1) {
+            return Object.assign({}, t, { status: 'completed', champion: winners[0] });
+          }
+
+          var nextRound = makeKnockoutMatches(winners, knockoutRoundLabel(winners.length));
+          return Object.assign({}, t, { knockoutRounds: t.knockoutRounds.concat([nextRound]) });
+        });
+      });
+    });
+  }
+
+  // ---------------- View toggle / login ----------------
+  document.getElementById('btn-public').addEventListener('click', function () {
+    state.view = 'public';
+    render();
+  });
+
+  document.getElementById('btn-admin').addEventListener('click', function () {
+    if (state.isAdminAuthed) {
+      state.view = 'admin';
+    } else {
+      state.view = 'login';
+    }
+    render();
+  });
+
+  document.getElementById('login-back-btn').addEventListener('click', function () {
+    state.view = 'public';
+    document.getElementById('passcode-error').classList.add('hidden');
+    document.getElementById('passcode-input').value = '';
+    render();
+  });
+
+  document.getElementById('login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var input = document.getElementById('passcode-input');
+    var errEl = document.getElementById('passcode-error');
+    if (input.value === ADMIN_PASSCODE) {
+      state.isAdminAuthed = true;
+      state.view = 'admin';
+      errEl.classList.add('hidden');
+      input.value = '';
+      render();
+    } else {
+      errEl.classList.remove('hidden');
+    }
+  });
+
+  // ---------------- New tournament modal ----------------
+  document.getElementById('new-modal-cancel').addEventListener('click', function () {
+    document.getElementById('new-modal').classList.add('hidden');
+  });
+  document.getElementById('new-modal').addEventListener('click', function (e) {
+    if (e.target.id === 'new-modal') document.getElementById('new-modal').classList.add('hidden');
+  });
+  document.getElementById('new-tournament-name').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('new-modal-create').click();
+  });
+  document.getElementById('new-modal-create').addEventListener('click', function () {
+    var nameInput = document.getElementById('new-tournament-name');
+    var name = nameInput.value.trim() || ('Tournament ' + (state.tournaments.length + 1));
+    var t = newTournament(name);
+    state.tournaments = [t].concat(state.tournaments);
+    state.selectedTournamentId = t.id;
+    document.getElementById('new-modal').classList.add('hidden');
+    persist();
+    render();
+  });
+
+  // ---------------- Init ----------------
+  (async function init() {
+    state.tournaments = await loadTournaments();
+    if (state.tournaments.length > 0) {
+      state.selectedTournamentId = state.tournaments[0].id;
+    }
+    render();
+
+    // Poll for updates from other viewers every 8 seconds.
+    // Skip refresh while the admin is mid-edit to avoid clobbering input.
+    setInterval(async function () {
+      if (state.editingPlayerId !== null) return;
+      if (document.getElementById('edit-name-input')) return;
+      if (saveTimeout) return; // a local save is pending/in-flight
+
+      var fresh = await loadTournaments();
+      var freshStr = JSON.stringify(fresh);
+      var currentStr = JSON.stringify(state.tournaments);
+      if (freshStr !== currentStr) {
+        state.tournaments = fresh;
+        if (state.selectedTournamentId && !fresh.some(function (t) { return t.id === state.selectedTournamentId; })) {
+          state.selectedTournamentId = fresh.length > 0 ? fresh[0].id : null;
+        }
+        render();
+      }
+    }, 8000);
+  })();
+})();
+</script>
+
+</body>
+</html>
